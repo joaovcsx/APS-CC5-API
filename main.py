@@ -1,97 +1,75 @@
 # coding: utf-8
 from flask import Flask, jsonify, request, render_template
 from flask_cors import CORS
+from class_util import User
+import firebase_admin
+from firebase_admin import credentials
+from firebase_admin import firestore
+from firebase_admin.firestore import SERVER_TIMESTAMP
+import datetime
+from firebase_module import FirebaseUserModule
 import jwt
 app = Flask(__name__)
 cors = CORS(app)
 
-neighborhoods = ['Bairros:']
+# cred = credentials.Certificate("dataBase/aps-cc5-communication-firebase-adminsdk-leq9b-786bf404c3.json")
+# firebase_admin.initialize_app(cred, { "projectId": "aps-cc5-communication" })
+# db = firestore.client()
+
+# chats = db.collection(u'users/5LfHosQOQunkZI7sarqN/chats').document(u'Jonsonsadasdsa')
+# chats.set({
+#     "user": 'Jones',
+#     "msg": "lil mama"
+# })
+# chats.set({
+#     "user2": 'Bretanhe',
+#     "msg": "brabo"
+# })
+
+# docs = users_ref.stream()
+# docs = users_ref.get()
+# for doc in docs:
+#     print(u'{} => {}'.format(doc.id, doc.to_dict()))
+
+# print(SERVER_TIMESTAMP)
+# print(datetime.datetime.now())
+# print(FirebaseUserModule.createChat('sdadsadsa', {'user_1': 'jonson', 'user_2': 'kkk'}))
+# print(FirebaseUserModule.getTokenChats())
 
 @app.route('/')
 def hello_world():
     return 'API do João!'
 
-# @app.route('/contatos', methods=['GET', 'POST'])
-# def contacts():
-#     if request.method == 'POST':
-#         contact = request.json
-#         from pprint import pprint
-#         print('\n\n=========================')
-#         pprint(contact)
-#         print('=========================\n\n')
-#         return render_template('contact.html', contact=contact)
-#         # return "200 OK"
-#     elif request.method == 'GET':     
-#         contacts = [
-#             {
-#                 "nome": "Felipe",
-#                 "telefone": "11 998878-7894"
-#             },
-#             {
-#                 "nome": "Joao",
-#                 "telefone": "11 7777-7894"
-#             }        
-#         ]
-#         return jsonify(contacts)
-
-@app.route('/contatos', methods=['GET', 'POST'])
-def contacts():
-    if request.method == 'POST':
-        contact = request.json
-        from pprint import pprint
-        print('\n\n=========================')
-        pprint(contact)
-        print('=========================\n\n')
-        # return render_template('contact.html', contact=contact)
-        return "200 OK"
-    elif request.method == 'GET':     
-        contacts = [
-            {
-                "nome": "Felipe",
-                "telefone": "11 998878-7894"
-            },
-            {
-                "nome": "Joao",
-                "telefone": "11 7777-7894"
-            }        
-        ]
-        return jsonify(contacts)
-
 @app.route('/user', methods=['GET', 'POST'])
 def users():
-    if request.method == 'GET':  
-        user_list = []
-        users_db = open('dataBase/users.txt').readlines()
-        for c in range(0, len(users_db)):
-            user_list.extend([{
-                "login": users_db[c].split()[0],
-                "password": users_db[c].split()[1]
-            }])
-        return jsonify(user_list)
+    if request.method == 'GET':
+        return jsonify(User.getUser())
 
     if request.method == 'POST':
-        newUser = request.json
-        if checkLogin(newUser['login']):
-            user_token = jwt.encode({'Login': newUser['login'], 
-                'password': newUser['password']}, 'secretX', algorithm='HS256')
-            users_db = open('dataBase/users.txt', 'a')
-            users_db.writelines("\n{} {} {}".format(newUser['login'], newUser['password'], user_token))
-            users_db.close()
-            return user_token
-        return 'user already registered'
-    
+        try:
+            return User.createUser(request.json)
+        except:
+            return 'Bad request'
 
-def checkLogin(login):
-    users_db = open('dataBase/users.txt').readlines()
-    for c in range(0, len(users_db)):
-        if users_db[c].split()[0] == login:
-            print(users_db[c].split()[0])
-            return False
-    return True
+@app.route('/user-chats', methods=['GET', 'POST'])
+def chats():
+    if request.method == 'GET':
+        return jsonify(User.check_and_create_chat(request.headers))
+
+@app.route('/user-access', methods=['GET', 'POST'])
+def users_authentication():
+    if request.method == 'GET':
+        return jsonify(User.check_user_authentication(request.headers))
+
 if __name__ == '__main__':
-    app.run()
+    app.run(port=8080)
 
 # Token user jwt
-# encoded_jwt = jwt.encode({'some': 'payload'}, 'secretX', algorithm='HS256')
+# encoded_jwt = jwt.encode({'user': 'joao', 'user2': 'lu'}, 'secretX', algorithm='HS256')
 # print(encoded_jwt)
 # print(jwt.decode(encoded_jwt, 'secretX', algorithms=['HS256']))
+
+# sorted
+# users = ['lu', 'joao']
+# users = sorted(users)
+# print(users)
