@@ -35,6 +35,7 @@ cors = CORS(app)
 # print(datetime.datetime.now())
 # print(FirebaseUserModule.createChat('sdadsadsa', {'user_1': 'jonson', 'user_2': 'kkk'}))
 # print(FirebaseUserModule.getTokenChats())
+# FirebaseUserModule.test()
 
 @app.route('/')
 def hello_world():
@@ -46,13 +47,12 @@ def users():
         return jsonify(User.getUser())
 
     if request.method == 'POST':
-        try:
-            return User.createUser(request.json)
-        except:
-            return 'Bad request'
+        return jsonify(User.createUser(request.json))
+
 
 @app.route('/user-chats', methods=['GET', 'POST'])
 def chats():
+    print(request.method)
     if request.method == 'GET':
         return jsonify(User.check_and_create_chat(request.headers))
 

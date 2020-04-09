@@ -1,3 +1,4 @@
+# coding: utf-8
 from firebase_module import FirebaseUserModule
 import jwt
 
@@ -13,7 +14,7 @@ class User:
         
     @staticmethod
     def createUser(user):
-        return '%s' % FirebaseUserModule.createUser(user)
+        return FirebaseUserModule.createUser(user)
 
     @staticmethod
     def check_user_authentication(headers):
@@ -24,12 +25,12 @@ class User:
         """
         db_users = FirebaseUserModule.getUsers()
         for check_user in db_users:
-            if check_user['login'] == headers['login']:
+            if check_user['email'] == headers['email']:
                 if check_user['password'] == headers['password']:
-                    return check_user['token']
+                    return {'status': 'valid', 'token': check_user['token']}
                 else:
-                    return 'user invalid'
-        return 'user invalid'
+                    return {'status': 'invalid', 'token': ''}
+        return {'status': 'invalid', 'token': ''}
 
     @staticmethod
     def check_and_create_chat(headers):
