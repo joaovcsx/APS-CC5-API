@@ -1,7 +1,8 @@
 # coding: utf-8
 from flask import Flask, jsonify, request, render_template
 from flask_cors import CORS
-from class_util import User
+from class_util import UserModule 
+from class_util import ChatModule
 import firebase_admin
 from firebase_admin import credentials
 from firebase_admin import firestore
@@ -44,22 +45,16 @@ def hello_world():
 @app.route('/user', methods=['GET', 'POST'])
 def users():
     if request.method == 'GET':
-        return jsonify(User.getUser())
+        return UserModule.getUser()
 
     if request.method == 'POST':
-        return jsonify(User.createUser(request.json))
-
+        return UserModule.createUser(request.json)
 
 @app.route('/user-chats', methods=['GET', 'POST'])
 def chats():
     print(request.method)
     if request.method == 'GET':
-        return jsonify(User.check_and_create_chat(request.headers))
-
-@app.route('/user-access', methods=['GET', 'POST'])
-def users_authentication():
-    if request.method == 'GET':
-        return jsonify(User.check_user_authentication(request.headers))
+        return ChatModule.check_and_create_chat(request.headers)
 
 if __name__ == '__main__':
     app.run(port=8080)

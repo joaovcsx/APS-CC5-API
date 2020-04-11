@@ -46,11 +46,9 @@ class FirebaseUserModule():
         #     print(erro)
         #     print(type(erro))
         #     print(filter_error_returned_from_firebase(erro))
-
-        
     
     @staticmethod
-    def getNameUsers():
+    def getEmailUsers():
         users = db.collection(u'users').get()
         login_users = []
         for user in users:
@@ -85,13 +83,69 @@ class FirebaseUserModule():
                 u"password": user['password'],
                 u"nickname": user['nickname'],   
                 u"phone": user['phone'],                     
-                u"token": user_token,
+                u"token": u'{}'.format(user_token),
                 u"datetime": SERVER_TIMESTAMP,   
             }
             create_query.set(parameters_user)
             return {u"status": u"user created", u"token": user_token}
         except Exception as erro:
             return filter_error_returned_from_firebase(erro)
+            #  return {u'erro': u'Bad request'}, 401
+    # @staticmethod
+    # def test():
+        # query_create = db.collection(
+        # u'parameters/conversations_to_users/%s' % 'idUsers').document('asdasd')
+        # query_create.set({
+        #     u"user": u'joaovitor@quickfast.com',
+        #     u"viewed": False,
+        #     u"chat": u'chat',
+        #     u"last_conversation_at": SERVER_TIMESTAMP
+        # })
+        # # query_create.update({
+        # #     u"viewed": False,
+        # #     u"last_conversation_at": SERVER_TIMESTAMP
+        # # })
+        # query_create = db.collection(
+        #     u'parameters/conversations_to_users/%s' % 'idUsers').stream()
+        # for doc in query_create:
+        #     print(u'{} => {}'.format(doc.id, doc.to_dict()))
+        # print('gg')
+
+class FirebaseChatModule():
+
+    @staticmethod
+    def createChat(token, headers):
+        # query_create = db.collection(
+        #     u'chats/parameters/chat_token').document()
+        # query_create.set({
+        #     u"user_1": u'%s' % headers['user_1'],
+        #     u"user_2": u'%s' % headers['user_2'],
+        #     u"chat": u'%s' % token,
+        #     u"datetime": SERVER_TIMESTAMP
+        # })
+        try:
+            query = db.collection(
+                u'parameters/conversations_of_users/%s' % headers['uid']).document(
+                    headers['uid_of_user'])
+            query.set({
+                u"user": headers['email_of_user'],
+                u"viewed": False,
+                u"chat": u'{}'.format(str(token)),
+                u"last_conversation_at": ''
+            })
+
+            query = db.collection(
+                u'parameters/conversations_of_users/%s' % headers['uid_of_user']).document(
+                    headers['uid'])
+            query.set({
+                u"user": headers['my_email'],
+                u"viewed": False,
+                u"chat": u'{}'.format(str(token)),
+                u"last_conversation_at": ''
+            })
+            return { 'status': 'created', 'chat': token }
+        except Exception as erro:
+            return filter_error_returned_from_firebase(erro), 401
 
     @staticmethod
     def chats():
@@ -106,45 +160,36 @@ class FirebaseUserModule():
             return False
 
     @staticmethod
-    def createChat(token, headers):
-        query_create = db.collection(
-            u'chats/parameters/chat_token').document()
-        query_create.set({
-            u"user_1": u'%s' % headers['user_1'],
-            u"user_2": u'%s' % headers['user_2'],
-            u"chat": u'%s' % token,
-            u"datetime": SERVER_TIMESTAMP
-        })
-        return { 'status': 'created', 'chat': token }
-
-    @staticmethod
-    def getTokenChats():
-        try:
-            query_chats = db.collection(u'chats/parameters/chat_token').get()
-            chats = []
-            for chat in query_chats:
-                chats.append(chat.to_dict())
-            return chats
-        except: 
+    def getTokenChat(uid, uid_user_to_conversation):
+        # query = db.collection(
+        #     u'parameters/conversations_of_users/{}/{}'.format(
+        #         uid, uid_user_to_conversation)).stram()
+        query = db.collection(
+            u'parameters/conversations_of_users/%s' % uid).document(
+                '%s' % uid_user_to_conversation).get()
+        if query.to_dict() and query.to_dict()['chat']:
+            return query.to_dict()['chat']
+        else:
             return False
-
-
-# def checkIfUserExist(name):
-#     users = db.collection(u'users').get()
-#     name_users = []
-#     if users:
-#         for user in users:
-#             name_users.append(user.to_dict()['login'])
-#         if name in name_users:
-#             return True
-#         else:
-#             return False
-#     else:
-#         return False
+        
+        # try:
+        #     query_chats = db.collection(u'chats/parameters/chat_token').get()
+        #     chats = []
+        #     for chat in query_chats:
+        #         chats.append(chat.to_dict())
+        #     return chats
+        # except: 
+        #     return False
 
 def filter_error_returned_from_firebase(erro):
     print(type(erro))
     print(erro)
+    if str(erro).split(':')[0] == 'Malformed email address string':
+        return {u'status': u'error',
+            'error': 'format_email_invalid'}
+    if str(erro).split(':')[0] == 'Invalid password string. Password must be a string at least 6 characters long.':
+        return {u'status': u'error',
+            'error': 'password_least_six_characters'}
     if type(erro) == _auth_utils.EmailAlreadyExistsError:
         return {u'status': u'error',
             'error': 'user_alread_created'}
