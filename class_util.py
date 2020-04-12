@@ -15,7 +15,6 @@ class UserModule:
     def createUser(user):
         return jsonify(FirebaseUserModule.createUser(user))
         
-# raise Exception
 class ChatModule:
     @staticmethod
     def check_and_create_chat(params):
@@ -36,6 +35,16 @@ class ChatModule:
         ).split('.')[1]
         return jsonify(FirebaseChatModule.createChat(token_chat, params))
 
+    @staticmethod
+    def notify_message_sending(params):
+        if params['action'] == 'notify':
+            if FirebaseChatModule.notify_message_sending(params):
+                return jsonify({u'status': u'notified_with_success'}), 201 
+        if params['action'] == 'remove_notify':
+            if FirebaseChatModule.remove_notify_message_sending(params):
+                return jsonify({u'status': u'removed_notified_with_success'}), 201 
+        return jsonify({u'erro': u'Bad request'}), 400 
+
 def checkParamsCreateUser(params):
     try:
         if params['uid'] and params['my_email'] and ( 
@@ -49,4 +58,3 @@ def checkParamsCreateUser(params):
         return False
     except:
         return False
-    

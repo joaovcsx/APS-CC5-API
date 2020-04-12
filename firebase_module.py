@@ -87,10 +87,11 @@ class FirebaseUserModule():
                 u"datetime": SERVER_TIMESTAMP,   
             }
             create_query.set(parameters_user)
-            return {u"status": u"user created", u"token": user_token}
+            return {u"status": u"user created", u"token": str(user_token.split('.')[1])}
         except Exception as erro:
             return filter_error_returned_from_firebase(erro)
             #  return {u'erro': u'Bad request'}, 401
+
     # @staticmethod
     # def test():
         # query_create = db.collection(
@@ -115,33 +116,35 @@ class FirebaseChatModule():
 
     @staticmethod
     def createChat(token, headers):
-        # query_create = db.collection(
-        #     u'chats/parameters/chat_token').document()
-        # query_create.set({
-        #     u"user_1": u'%s' % headers['user_1'],
-        #     u"user_2": u'%s' % headers['user_2'],
-        #     u"chat": u'%s' % token,
-        #     u"datetime": SERVER_TIMESTAMP
-        # })
         try:
             query = db.collection(
-                u'parameters/conversations_of_users/%s' % headers['uid']).document(
-                    headers['uid_of_user'])
+                u'parameters/conversations_of_users/%s' % headers['uid']
+                ).document(headers['uid_of_user'])
+            name = db.collection(u'users').document(headers['uid_of_user']
+                ).get().to_dict()['nickname']
             query.set({
                 u"user": headers['email_of_user'],
+                u"uid_user": headers['uid_of_user'],
+                u"nickname": u'%s' % name,
                 u"viewed": False,
                 u"chat": u'{}'.format(str(token)),
-                u"last_conversation_at": ''
+                u"last_conversation_at": u'pending',
+                u"messages_sent": 0
             })
 
             query = db.collection(
                 u'parameters/conversations_of_users/%s' % headers['uid_of_user']).document(
                     headers['uid'])
+            name = db.collection(u'users').document(headers['uid']
+                ).get().to_dict()['nickname']
             query.set({
                 u"user": headers['my_email'],
+                u"uid_user": headers['uid'],
+                u"nickname": u'%s' % name,
                 u"viewed": False,
                 u"chat": u'{}'.format(str(token)),
-                u"last_conversation_at": ''
+                u"last_conversation_at": u'pending',
+                u"messages_sent": 0
             })
             return { 'status': 'created', 'chat': token }
         except Exception as erro:
@@ -180,6 +183,37 @@ class FirebaseChatModule():
         #     return chats
         # except: 
         #     return False
+
+    @staticmethod
+    def notify_message_sending(params):
+        print(params)
+        # try:
+        query_create = db.collection(
+            u'parameters/conversations_of_users/%s' % params['uid_another_user']
+            ).document(params['uid_user'])
+        messages_sent = query_create.get().to_dict()['messages_sent'] + 1
+        query_create.update({
+            u"viewed": True,
+            u"last_conversation_at": SERVER_TIMESTAMP,
+            u"messages_sent": int(messages_sent)
+        })
+        return True
+        # except Exception as erro:
+        #     return filter_error_returned_from_firebase(erro), 401
+
+    @staticmethod
+    def remove_notify_message_sending(params):
+        try:
+            query_create = db.collection(u'parameters/conversations_of_users/%s'
+                % params['uid_user']).document(params['uid_another_user'])
+            query_create.update({
+                u"viewed": False,
+                u"last_conversation_at": SERVER_TIMESTAMP,
+                u"messages_sent": int(0)
+            })
+            return True
+        except Exception as erro:
+            return filter_error_returned_from_firebase(erro), 401
 
 def filter_error_returned_from_firebase(erro):
     print(type(erro))

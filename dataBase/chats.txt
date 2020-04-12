@@ -1,6 +1,0 @@
-Jones"/"-Ana Jonson de Brantheram"/"-eyJuYW1lXzIiOiJBbmEgSm9uc29uIGRlIEJyYW50aGVyYW0iLCJuYW1lXzEiOiJKb25lcyJ9
-Joness"/"-Ana Jonson de Brantheram"/"-eyJuYW1lXzIiOiJBbmEgSm9uc29uIGRlIEJyYW50aGVyYW0iLCJuYW1lXzEiOiJKb25lc3MifQ
-Ana"/"-Jones"/"-eyJuYW1lXzIiOiJKb25lcyIsIm5hbWVfMSI6IkFuYSJ9
-admin"/"-Jones"/"-eyJuYW1lXzIiOiJKb25lcyIsIm5hbWVfMSI6ImFkbWluIn0
-admin"/"-joao"/"-FfrMhGgYrRfKmQp2FoJs
-admin"/"-teste"/"-eyJuYW1lXzIiOiJ0ZXN0ZSIsIm5hbWVfMSI6ImFkbWluIn0

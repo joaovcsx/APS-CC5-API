@@ -1,3 +1,0 @@
-admin"/"-root12"/"-eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJMb2dpbiI6ImFkbWluIiwicGFzc3dvcmQiOiJyb290MTIifQ.XtIG4IlkYxLjcxfYAGwCkDDdMBDBXVver8xfTpBI91M
-joao"/"-root12"/"-eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJwYXNzd29yZCI6InJvb3QxMiIsIm5hbWUiOiJqb2FvIn0.5Fosbyncg6ZPKANE0-oBqMt9Zuc64KKIW3-p5o1FYnc
-teste"/"-123"/"-eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJwYXNzd29yZCI6IjEyMyIsIm5hbWUiOiJ0ZXN0ZSJ9.WpcwI-XP8SFvvtYmOGgaAvIeL_RtUkDGMgFvOgJJ-hI
