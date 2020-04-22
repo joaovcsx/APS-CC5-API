@@ -34,5 +34,5 @@ def chats():
         return ChatModule.notify_message_sending(request.json)
 
 if __name__ == '__main__':
-    app.run(port=8080)
+    app.run(port=8050)
 
