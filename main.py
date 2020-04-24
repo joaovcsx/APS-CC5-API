@@ -16,15 +16,15 @@ cors = CORS(app)
 
 @app.route('/')
 def hello_world():
-    return 'API do João!'
+    return 'API - CC5P22'
 
 @app.route('/user', methods=['GET', 'POST'])
 def users():
     if request.method == 'GET':
-        return UserModule.getUser()
+        return UserModule.get_users()
 
     if request.method == 'POST':
-        return UserModule.createUser(request.json)
+        return UserModule.create_user(request.json)
 
 @app.route('/user-chats', methods=['GET', 'POST'])
 def chats():

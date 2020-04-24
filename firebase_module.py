@@ -1,9 +1,9 @@
 # coding: utf-8
 import firebase_admin
-from firebase_admin           import credentials
-from firebase_admin           import firestore
-from firebase_admin           import auth
-from firebase_admin           import exceptions
+from firebase_admin import credentials
+from firebase_admin import firestore
+from firebase_admin import auth
+from firebase_admin import exceptions
 import jwt
 import json 
 from firebase_admin.firestore import SERVER_TIMESTAMP
@@ -18,53 +18,44 @@ firebase_admin.initialize_app(cred, { "projectId": "aps-cc5-communication" })
 db = firestore.client()
 
 class FirebaseUserModule():
-
-    # @staticmethod
-    # def test():
-        # try:
-        #     random_id = str(uuid.uuid4()).lower().replace('-', '')
-        #     user = auth.create_user(
-        #         uid= random_id,
-        #         email="ssss@jonson.net",
-        #         display_name='Random User',
-        #         email_verified=False,
-        #         password='secret',
-        #     )
-        #     test = auth.get_user(random_id)
-        #     print(test.uid)
-        #     return jsonify({u'status': u'created_with_success'})
-        # except Exception as erro:
-        #     #auth.FirebaseAuthError
-        #     # print(filter_error_returned_from_firebase(erro))
-        #     return jsonify(filter_error_returned_from_firebase(erro))
-
-        # try:
-        #     user = auth.get_user('c1d3750a87704626b2ead2f567b18090')
-        #     # user = auth.get_user_by_email('joaovitor@quickfast.com')
-        #     print(user.password)
-        # except Exception as erro:
-        #     print(erro)
-        #     print(type(erro))
-        #     print(filter_error_returned_from_firebase(erro))
     
     @staticmethod
-    def getEmailUsers():
-        users = db.collection(u'users').get()
-        login_users = []
-        for user in users:
-            login_users.append(user.to_dict()['email'])
-        return login_users
+    def get_email_users():
+        """
+        Get email from users
+        :return: list string
+        """
+        try:
+            users = db.collection(u'users').get()
+            login_users = []
+            for user in users:
+                login_users.append(user.to_dict()['email'])
+            return login_users
+        except Exception as erro:
+            return filter_error_returned_from_firebase(erro)
         
     @staticmethod
-    def getUsers():
-        users = db.collection(u'users').get()
-        login_users = []
-        for user in users:
-            login_users.append(user.to_dict())
-        return login_users
+    def get_users():
+        """
+        Get users
+        :return: list User
+        """
+        try:
+            users = db.collection(u'users').get()
+            login_users = []
+            for user in users:
+                login_users.append(user.to_dict())
+            return login_users
+        except Exception as erro:
+            return filter_error_returned_from_firebase(erro)
 
     @staticmethod
-    def createUser(user):
+    def create_user(user):
+        """
+        Get users
+        :param user: User
+        :return: Json { status: string, token: string }
+        """
         user_token = jwt.encode({'email': user['email'], 
             'password': user['password']}, 'secretX', algorithm='HS256')
         try:
@@ -77,7 +68,8 @@ class FirebaseUserModule():
                 password = user['password'],
             )
             # save in database
-            create_query = db.collection(u'users').document(u'%s' % user_token.split('.')[1])
+            query = db.collection(u'users').document(
+                u'%s' % user_token.split('.')[1])
             parameters_user = {
                 u"email": user['email'],
                 u"password": user['password'],
@@ -86,61 +78,52 @@ class FirebaseUserModule():
                 u"token": u'{}'.format(user_token),
                 u"datetime": SERVER_TIMESTAMP,   
             }
-            create_query.set(parameters_user)
-            return {u"status": u"user created", u"token": str(user_token.split('.')[1])}
+            query.set(parameters_user)
+            return { u"status": u"user created", u"token": str(user_token.split('.')[1])}
         except Exception as erro:
             return filter_error_returned_from_firebase(erro)
-            #  return {u'erro': u'Bad request'}, 401
-
-    # @staticmethod
-    # def test():
-        # query_create = db.collection(
-        # u'parameters/conversations_to_users/%s' % 'idUsers').document('asdasd')
-        # query_create.set({
-        #     u"user": u'joaovitor@quickfast.com',
-        #     u"viewed": False,
-        #     u"chat": u'chat',
-        #     u"last_conversation_at": SERVER_TIMESTAMP
-        # })
-        # # query_create.update({
-        # #     u"viewed": False,
-        # #     u"last_conversation_at": SERVER_TIMESTAMP
-        # # })
-        # query_create = db.collection(
-        #     u'parameters/conversations_to_users/%s' % 'idUsers').stream()
-        # for doc in query_create:
-        #     print(u'{} => {}'.format(doc.id, doc.to_dict()))
-        # print('gg')
 
 class FirebaseChatModule():
 
     @staticmethod
-    def createChat(token, headers):
+    def create_chat(token, headers):
+        """
+        Create key to conversation between users
+        :param token: string
+        :param headers: { 
+                            my_email: string,
+                            uid: strin: string,
+                            uid_of_user: string,
+                            email_of_user: string,
+                        }
+        :return: Json { status: string, token: string }
+        """
         try:
+            # Set talk parameters in key from first user
             query = db.collection(
                 u'parameters/conversations_of_users/%s' % headers['uid']
                 ).document(headers['uid_of_user'])
-            name = db.collection(u'users').document(headers['uid_of_user']
+            name_from_user = db.collection(u'users').document(headers['uid_of_user']
                 ).get().to_dict()['nickname']
             query.set({
                 u"user": headers['email_of_user'],
                 u"uid_user": headers['uid_of_user'],
-                u"nickname": u'%s' % name,
+                u"nickname": u'%s' % name_from_user,
                 u"viewed": False,
                 u"chat": u'{}'.format(str(token)),
                 u"last_conversation_at": u'pending',
                 u"messages_sent": 0
             })
-
+            # Set talk parameters in key from second user
             query = db.collection(
                 u'parameters/conversations_of_users/%s' % headers['uid_of_user']).document(
                     headers['uid'])
-            name = db.collection(u'users').document(headers['uid']
+            name_from_user = db.collection(u'users').document(headers['uid']
                 ).get().to_dict()['nickname']
             query.set({
                 u"user": headers['my_email'],
                 u"uid_user": headers['uid'],
-                u"nickname": u'%s' % name,
+                u"nickname": u'%s' % name_from_user,
                 u"viewed": False,
                 u"chat": u'{}'.format(str(token)),
                 u"last_conversation_at": u'pending',
@@ -151,58 +134,52 @@ class FirebaseChatModule():
             return filter_error_returned_from_firebase(erro), 401
 
     @staticmethod
-    def chats():
-        teste = db.collection(u'chats').get()
-        te = []
-        for test in teste:
-            te.append(test.id)
-        print(te)
-        if teste:
-            return True
-        else: 
+    def get_conversation_key(uid, uid_user_to_talk):
+        """
+        Get talk key between users
+        :param uid: string
+        :param uid_user_to_talk: string
+        :return: chat: string | False
+        """
+        try:
+            query = db.collection(
+                u'parameters/conversations_of_users/%s' % uid).document(
+                    '%s' % uid_user_to_talk).get()
+            if query.to_dict() and query.to_dict()['chat']:
+                return query.to_dict()['chat']
+            else:
+                return False
+        except Exception:
             return False
-
-    @staticmethod
-    def getTokenChat(uid, uid_user_to_conversation):
-        # query = db.collection(
-        #     u'parameters/conversations_of_users/{}/{}'.format(
-        #         uid, uid_user_to_conversation)).stram()
-        query = db.collection(
-            u'parameters/conversations_of_users/%s' % uid).document(
-                '%s' % uid_user_to_conversation).get()
-        if query.to_dict() and query.to_dict()['chat']:
-            return query.to_dict()['chat']
-        else:
-            return False
-        
-        # try:
-        #     query_chats = db.collection(u'chats/parameters/chat_token').get()
-        #     chats = []
-        #     for chat in query_chats:
-        #         chats.append(chat.to_dict())
-        #     return chats
-        # except: 
-        #     return False
 
     @staticmethod
     def notify_message_sending(params):
-        print(params)
-        # try:
-        query_create = db.collection(
-            u'parameters/conversations_of_users/%s' % params['uid_another_user']
-            ).document(params['uid_user'])
-        messages_sent = query_create.get().to_dict()['messages_sent'] + 1
-        query_create.update({
-            u"viewed": True,
-            u"last_conversation_at": SERVER_TIMESTAMP,
-            u"messages_sent": int(messages_sent)
-        })
-        return True
-        # except Exception as erro:
-        #     return filter_error_returned_from_firebase(erro), 401
+        """
+        Notify user when to send message
+        :param params: Object {uid_another_user: string, uid_user: string}
+        :return: Json {status: string} | {status: string, error: string}
+        """
+        try:
+            query_create = db.collection(
+                u'parameters/conversations_of_users/%s' % params['uid_another_user']
+                ).document(params['uid_user'])
+            messages_sent = query_create.get().to_dict()['messages_sent'] + 1
+            query_create.update({
+                u"viewed": True,
+                u"last_conversation_at": SERVER_TIMESTAMP,
+                u"messages_sent": int(messages_sent)
+            })
+            return {u'status': u'executed_successfully'}
+        except Exception as erro:
+            return filter_error_returned_from_firebase(erro)
 
     @staticmethod
     def remove_notify_message_sending(params):
+        """
+        Remove notification from user when to send message
+        :param params: Object {uid_another_user: string, uid_user: string}
+        :return: Json {status: string} | {status: string, error: string}
+        """
         try:
             query_create = db.collection(u'parameters/conversations_of_users/%s'
                 % params['uid_user']).document(params['uid_another_user'])
@@ -211,12 +188,16 @@ class FirebaseChatModule():
                 u"last_conversation_at": SERVER_TIMESTAMP,
                 u"messages_sent": int(0)
             })
-            return True
+            return {u'status': u'executed_successfully'}
         except Exception as erro:
             return filter_error_returned_from_firebase(erro), 401
 
 def filter_error_returned_from_firebase(erro):
-    print(type(erro))
+    """
+        Remove notification from user when to send message
+        :param params: Object {uid_another_user: string, uid_user: string}
+        :return: Json {status: string} | {status: string, error: string}
+        """
     print(erro)
     if str(erro).split(':')[0] == 'Malformed email address string':
         return {u'status': u'error',
