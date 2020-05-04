@@ -11,13 +11,22 @@ class UserModule:
         return jsonify(FirebaseUserModule.get_email_users())
         
     @staticmethod
-    def create_user(user):
-        return jsonify(FirebaseUserModule.create_user(user))
+    def post_user(request):
+        print(request)
+        if request['action'] == 'create':
+            return jsonify(FirebaseUserModule.create_user(request['user']))
+        if request['action'] == 'update':
+            response = FirebaseUserModule.update_user(request['user'])
+            if response['status'] == 'update':
+                return jsonify(response), 201
+            if response['status'] == 'error':
+                return jsonify(response), 400
+        return jsonify({u'erro': u'Bad request'}), 400 
         
 class ChatModule:
     @staticmethod
     def check_and_create_chat(params):
-        if not check_params_create_user(params):
+        if not check_params_create_chat(params):
             return jsonify({u'erro': u'Bad request'}), 400
 
         db_chat = FirebaseChatModule.get_conversation_key(
@@ -46,7 +55,7 @@ class ChatModule:
                 return jsonify({u'status': u'removed_notified_with_success'}), 201 
         return jsonify({u'erro': u'Bad request'}), 400 
 
-def check_params_create_user(params):
+def check_params_create_chat(params):
     try:
         if params['uid'] and params['my_email'] and ( 
             params['email_of_user'] and params['uid_of_user']

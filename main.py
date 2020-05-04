@@ -24,7 +24,7 @@ def users():
         return UserModule.get_users()
 
     if request.method == 'POST':
-        return UserModule.create_user(request.json)
+        return UserModule.post_user(request.json)
 
 @app.route('/user-chats', methods=['GET', 'POST'])
 def chats():

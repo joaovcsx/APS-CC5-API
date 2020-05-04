@@ -65,6 +65,7 @@ class FirebaseUserModule():
                 email = user['email'],
                 display_name = user['nickname'],
                 email_verified = False,
+                photo_url = user['profile_photo'],
                 password = user['password'],
             )
             # save in database
@@ -74,12 +75,58 @@ class FirebaseUserModule():
                 u"email": user['email'],
                 u"password": user['password'],
                 u"nickname": user['nickname'],   
-                u"phone": user['phone'],                     
+                u"phone": user['phone'],  
+                u"profile_photo": user['profile_photo'],                
                 u"token": u'{}'.format(user_token),
                 u"datetime": SERVER_TIMESTAMP,   
             }
             query.set(parameters_user)
             return { u"status": u"user created", u"token": str(user_token.split('.')[1])}
+        except Exception as erro:
+            return filter_error_returned_from_firebase(erro)
+
+    @staticmethod
+    def update_user(user):
+        """
+        Update user
+        :param user: User
+        :return: Json { status: string }
+        """
+        try:
+            # update in authentication user 
+            if user['password'] != '':
+                responseCreateUser = auth.update_user(
+                    uid = user['token'],
+                    display_name = user['nickname'],
+                    photo_url = user['profile_photo'],
+                    password = user['password']
+                )
+                # save in database
+                query = db.collection(u'users').document(user['token'])
+                parameters_user = {
+                    u"password": user['password'],
+                    u"nickname": user['nickname'],   
+                    u"phone": user['phone'],  
+                    u"profile_photo": user['profile_photo'],                
+                    u"datetime": SERVER_TIMESTAMP,   
+                }
+                query.update(parameters_user)
+            else:
+                responseCreateUser = auth.update_user(
+                    uid = user['token'],
+                    display_name = user['nickname'],
+                    photo_url = user['profile_photo'],
+                )
+                 # save in database
+                query = db.collection(u'users').document(user['token'])
+                parameters_user = {
+                    u"nickname": user['nickname'],
+                    u"phone": user['phone'],
+                    u"profile_photo": user['profile_photo'],
+                    u"datetime": SERVER_TIMESTAMP,
+                }
+                query.update(parameters_user)
+            return { u"status": u"update" }
         except Exception as erro:
             return filter_error_returned_from_firebase(erro)
 
