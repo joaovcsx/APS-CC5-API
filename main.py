@@ -12,7 +12,8 @@ import jwt
 import os
 
 app = Flask(__name__)
-cors = CORS(app)
+# cors = CORS(app)
+cors = CORS(app, resource={r"/*":{"origins": "*"}})
 
 @app.route('/')
 def hello_world():

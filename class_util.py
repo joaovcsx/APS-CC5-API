@@ -12,7 +12,6 @@ class UserModule:
         
     @staticmethod
     def post_user(request):
-        print(request)
         if request['action'] == 'create':
             return jsonify(FirebaseUserModule.create_user(request['user']))
         if request['action'] == 'update':
