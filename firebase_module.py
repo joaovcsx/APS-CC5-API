@@ -207,6 +207,7 @@ class FirebaseChatModule():
         :return: Json {status: string} | {status: string, error: string}
         """
         try:
+            # notify user
             query_create = db.collection(
                 u'parameters/conversations_of_users/%s' % params['uid_another_user']
                 ).document(params['uid_user'])
@@ -216,6 +217,13 @@ class FirebaseChatModule():
                 u"last_conversation_at": SERVER_TIMESTAMP,
                 u"messages_sent": int(messages_sent)
             })
+            # update my yser
+            query_create = db.collection(
+                u'parameters/conversations_of_users/%s' % params['uid_user']
+                ).document(params['uid_another_user'])
+            query_create.update({
+                u"last_conversation_at": SERVER_TIMESTAMP,
+            })    
             return {u'status': u'executed_successfully'}
         except Exception as erro:
             return filter_error_returned_from_firebase(erro)
