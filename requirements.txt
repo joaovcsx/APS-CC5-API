@@ -16,10 +16,8 @@ enum34==1.1.10
 filelock==3.0.12
 firebase==3.0.0
 firebase-admin==3.2.1
-flask-cors
 Flask==1.1.1
 Flask-Cors==3.0.8
-Six
 future==0.16.0
 futures==3.3.0
 gax-google-logging-v2==0.8.3
@@ -38,6 +36,7 @@ googleapis-common-protos==1.51.0
 grpc-google-logging-v2==0.8.1
 grpc-google-pubsub-v1==0.8.1
 grpcio==1.27.2
+gunicorn==19.10.0
 gyp==0.1
 httplib2==0.17.0
 idna==2.9
