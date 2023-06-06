@@ -1,14 +1,7 @@
 # coding: utf-8
-from flask import Flask, jsonify, request, render_template
+from flask import Flask, request
 from flask_cors import CORS
 from class_util import ChatModule, UserModule
-import firebase_admin
-from firebase_admin import credentials
-from firebase_admin import firestore
-from firebase_admin.firestore import SERVER_TIMESTAMP
-import datetime
-from firebase_module import FirebaseChatModule, FirebaseUserModule
-import jwt
 import os
 
 app = Flask(__name__)

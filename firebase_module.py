@@ -1,16 +1,10 @@
 # coding: utf-8
+import jwt
 import firebase_admin
 from firebase_admin import credentials
 from firebase_admin import firestore
 from firebase_admin import auth
-from firebase_admin import exceptions
-import jwt
-import json 
 from firebase_admin.firestore import SERVER_TIMESTAMP
-import datetime
-import base64
-import random
-import uuid
 from firebase_admin import _auth_utils
 
 cred = credentials.Certificate("dataBase/aps-cc5-communication-firebase-adminsdk-leq9b-786bf404c3.json")
@@ -18,7 +12,7 @@ firebase_admin.initialize_app(cred, { "projectId": "aps-cc5-communication" })
 db = firestore.client()
 
 class FirebaseUserModule():
-    
+
     @staticmethod
     def get_email_users():
         """
@@ -33,7 +27,7 @@ class FirebaseUserModule():
             return login_users
         except Exception as erro:
             return filter_error_returned_from_firebase(erro)
-        
+
     @staticmethod
     def get_users():
         """
@@ -56,10 +50,10 @@ class FirebaseUserModule():
         :param user: User
         :return: Json { status: string, token: string }
         """
-        user_token = jwt.encode({'email': user['email'], 
+        user_token = jwt.encode({'email': user['email'],
             'password': user['password']}, 'secretX', algorithm='HS256')
         try:
-            # save in authentication user 
+            # save in authentication user
             responseCreateUser = auth.create_user(
                 uid = str(user_token.split('.')[1]),
                 email = user['email'],
@@ -74,11 +68,11 @@ class FirebaseUserModule():
             parameters_user = {
                 u"email": user['email'],
                 u"password": user['password'],
-                u"nickname": user['nickname'],   
-                u"phone": user['phone'],  
-                u"profile_photo": user['profile_photo'],                
+                u"nickname": user['nickname'],
+                u"phone": user['phone'],
+                u"profile_photo": user['profile_photo'],
                 u"token": u'{}'.format(user_token),
-                u"datetime": SERVER_TIMESTAMP,   
+                u"datetime": SERVER_TIMESTAMP,
             }
             query.set(parameters_user)
             return { u"status": u"user created", u"token": str(user_token.split('.')[1])}
@@ -93,7 +87,7 @@ class FirebaseUserModule():
         :return: Json { status: string }
         """
         try:
-            # update in authentication user 
+            # update in authentication user
             if user['password'] != '':
                 responseCreateUser = auth.update_user(
                     uid = user['token'],
@@ -105,10 +99,10 @@ class FirebaseUserModule():
                 query = db.collection(u'users').document(user['token'])
                 parameters_user = {
                     u"password": user['password'],
-                    u"nickname": user['nickname'],   
-                    u"phone": user['phone'],  
-                    u"profile_photo": user['profile_photo'],                
-                    u"datetime": SERVER_TIMESTAMP,   
+                    u"nickname": user['nickname'],
+                    u"phone": user['phone'],
+                    u"profile_photo": user['profile_photo'],
+                    u"datetime": SERVER_TIMESTAMP,
                 }
                 query.update(parameters_user)
             else:
@@ -137,7 +131,7 @@ class FirebaseChatModule():
         """
         Create key to conversation between users
         :param token: string
-        :param headers: { 
+        :param headers: {
                             my_email: string,
                             uid: strin: string,
                             uid_of_user: string,
@@ -223,7 +217,7 @@ class FirebaseChatModule():
                 ).document(params['uid_another_user'])
             query_create.update({
                 u"last_conversation_at": SERVER_TIMESTAMP,
-            })    
+            })
             return {u'status': u'executed_successfully'}
         except Exception as erro:
             return filter_error_returned_from_firebase(erro)
@@ -283,6 +277,6 @@ def filter_error_returned_from_firebase(erro):
             u'error': str(erro)}
     else:
         return {u'status': u'error',
-            u'error': str(erro)}  
+            u'error': str(erro)}
 
 #     test = auth.get_user(random_id)
