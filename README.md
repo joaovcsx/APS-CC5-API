@@ -10,6 +10,5 @@
 - Start API
     python main.py
 
-## Login to Test
-    - https://aps-cc5-communication.web.app
-    admin@gmail.com root12
+- https://aps-cc5-communication.web.app
+    ### admin@gmail.com root12
