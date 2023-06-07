@@ -10,5 +10,4 @@
 - Start API
     python main.py
 
-- https://aps-cc5-communication.web.app
-    ### admin@gmail.com root12
+- https://aps-cc5-communication.web.app - Login: admin@gmail.com / password: root12
