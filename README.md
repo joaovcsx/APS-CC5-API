@@ -9,3 +9,6 @@
 
 - Start API
     python main.py
+
+# Login to Test
+    admin@gmail.com root12
